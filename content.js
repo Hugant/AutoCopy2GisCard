@@ -177,19 +177,7 @@
 			}
 		}
 	});
-	
-	window.onfocus = function() {
-		if (~window.location.href.indexOf("amocrm.ru/leads/add/")) {
-			chrome.extension.sendMessage({name: "getCard"}, function(req) {
-				if (this.card.id == null || (req == null && this.card.id != req.id)) {
-					this.card = req;
-				} else if (req != null) {
-					this.card = req;
-				}
-			});
-		}
-	};
-	
+
 	$("head title")[0].addEventListener("DOMSubtreeModified", function() {
 		if (~this.text.indexOf("amoCRM: Сделка #XXXXXX")) {
 			var $newCompanyForm = $("#new_company_form");
