@@ -1,11 +1,175 @@
 (function() {
-	//var card = new Card();
-	
+	/*const EventBus = {
+		channels: {},
+		subscribe: function(channelName, listener) {
+			if (!this.channels[channelName]) {
+				this.channels[channelName] = [];
+			}
+			this.channels[channelName].push(listener);
+		},
+
+		publish: function(channelName, data) {
+			const channel = this.channels[channelName];
+			if (!channel || !channel.length) {
+				return;
+			}
+
+			channel.forEach(listener => listener(data));
+		}
+	}
+
+	class Card {
+		constructor(data) {
+			EventBus.subscribe("setName",	 this.setName);
+			EventBus.subscribe("setCity", 	 this.setCity);
+			EventBus.subscribe("setPhones",  this.setPhones);
+			EventBus.subscribe("setEmails",  this.setEmails);
+			EventBus.subscribe("setWebsite", this.setWebsite);
+			EventBus.subscribe("setAddress", this.setAddress);
+
+			if (data) {
+
+			}
+		}
+
+		setNumber(number) {
+
+		}
+
+		getNumber() {
+			return this.number;
+		}
+
+		getCity(city) {
+			return this.city;
+		}
+
+		setName(name) {
+			return "sdf"
+		}
+
+		getName() {
+
+		}
+
+		setPhones(phones) {
+
+		}
+
+		getPhones() {
+			return this.phones;
+		}
+
+		setEmails(emails) {
+
+		}
+
+		getEmails() {
+			return this.emails;
+		}
+
+		setWebsite(website) {
+
+		}
+
+		getWebsite() {
+			return this.website;
+		}
+
+		setAddress(address) {
+
+		}
+
+		getAddress() {
+			return this.address;
+		}
+	}
+
+	class Parser {
+		constructor() {
+
+		}
+
+		setName() {
+			EventBus.publish("setName", "parsed name");
+
+		}
+
+		setCity() {
+
+		}
+
+		setPhones() {
+
+		}
+
+		setEmails() {
+
+		}
+
+		setWebsite() {
+
+		}
+
+		setAddress() {
+			var addressTemp;
+
+			if ($(".card__filials")[0] != null) {
+				var html = $.ajax($(".card__filials .card__filialsLink")[0].href);
+
+				html.done(function(d) {
+					var $articles = $(d).find("article");
+
+					addressTemp = $articles.length + ($articles.length % 10 < 5 ? " филиала: " : " филиалов: ");
+
+					for (var i = 0; i < $articles.length; i++) {
+						if ($($articles[i]).find("._address")[0] == null) {
+							addressTemp += $($articles[i]).find(".miniCard__headerTitleLink")[0]
+								.text.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
+						} else {
+							addressTemp += $($articles[i]).find(".miniCard__address")[0]
+								.innerHTML.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
+						}
+
+					}
+
+					return addressTemp;
+				});
+
+				html.fail(function(e, g, f) {
+					addressTemp = $(".card__addressLink")[0].text.replace("&nbsp;", " ").replace("<br>", " ");
+					return addressTemp;
+				});
+			} else {
+				addressTemp = $(".card__addressLink")[0].text.replace("&nbsp;", " ").replace("<br>", " ");
+				return addressTemp;
+			}
+		}
+	}
+
+	$(document).ready(function() {
+		const card = new Card();
+		const parser = new Parser();
+
+		parser.setName();
+	});
+	// number:	$($("#person_name")[0]),
+	// city: 	$($(".card-entity-form__fields textarea")[0]),
+	// name: 	$($newCompanyForm.find("#new_company_name")[0]),
+	// phones: [],
+	// emails: [],
+	// site: 	$($newCompanyForm.find(".text-input[type = url]")[0]),
+	// adress: $($newCompanyForm.find("textarea")[0])
+
+*/
+
+
+
 	$(document).ready(function() {
 		if(~window.location.href.indexOf("2gis.ru")) {
 			this.onkeydown = function(e) {
 				if (e.ctrlKey && e.keyCode == 67) {
-					var card = new Card();
+					var card = {};
 					copyCard(card);
 					chrome.extension.sendMessage({name: "setCard", value: card});
 					console.log(card);
@@ -29,67 +193,68 @@
 	$("head title")[0].addEventListener("DOMSubtreeModified", function() {
 		if (~this.text.indexOf("amoCRM: Сделка #XXXXXX")) {
 			var $newCompanyForm = $("#new_company_form");
-		
+
 			$inputs = {
 				number:	$($("#person_name")[0]),
 				city: 	$($(".card-entity-form__fields textarea")[0]),
 				name: 	$($newCompanyForm.find("#new_company_name")[0]),
 				phones: [],
 				emails: [],
-				site: 	$($newCompanyForm.find(".text-input[type = url]")[0]),
+				website:$($newCompanyForm.find(".text-input[type = url]")[0]),
 				adress: $($newCompanyForm.find("textarea")[0])
 			};
-		
-			var card = getCard();
-			console.log(card);
-			
-			$inputs.name.bind("click", function() {
-				addInputs(card);
-				
-				$inputs.phones = $newCompanyForm.find(".control-phone__formatted").toArray();
-				$inputs.emails = $newCompanyForm.find(".text-input[data-type = email]").toArray();
-				
-				fillPlaceholders($inputs, card);
-				copyTextToClipboard(card.name);
-				this.focus();
-			});
-			
-			$inputs.city.bind("click", function() {
-				copyTextToClipboard(card.city);
-				this.focus();
-			});
-			
-			$newCompanyForm.on("click", ".text-input", function() {
-				if (this.placeholder != "undefined" && this.placeholder != "") {
-					copyTextToClipboard(this.placeholder);
+
+			chrome.extension.sendMessage({name: "getCard"}, function(req) {
+				var card = req;
+
+				$inputs.name.bind("click", function() {
+					addInputs(card);
+
+					$inputs.phones = $newCompanyForm.find(".control-phone__formatted").toArray();
+					$inputs.emails = $newCompanyForm.find(".text-input[data-type = email]").toArray();
+
+					fillPlaceholders($inputs, card);
+					copyTextToClipboard(card.name);
 					this.focus();
-				}
-			});
-			
-			$inputs.number.bind("click", function() {
-				copyTextToClipboard("№ " + card.number);
-				this.focus();
-			});
-			
-			$("#save_and_close_contacts_link").click(function() {
-				chrome.extension.sendMessage({name: "increaseNumber"});
+				});
+
+				$inputs.city.bind("click", function() {
+					copyTextToClipboard(card.city);
+					this.focus();
+				});
+
+				$newCompanyForm.on("click", ".text-input", function() {
+					if (this.placeholder != "undefined" && this.placeholder != "") {
+						copyTextToClipboard(this.placeholder);
+						this.focus();
+					}
+				});
+
+				$inputs.number.bind("click", function() {
+					copyTextToClipboard("№ " + card.number);
+					this.focus();
+				});
+
+				$("#save_and_close_contacts_link").click(function() {
+					chrome.extension.sendMessage({name: "increaseNumber"});
+				});
 			});
 		}
 	});
-	
+
 	function addInputs(card) {
 		var $phonesInputs = $("#new_company_form .control-phone__formatted");
 		var $emailsInputs = $("#new_company_form .text-input[data-type = email]");
 
-		if ($phonesInputs.length < card.getPhones().length) {
-			for (var i = $phonesInputs.length; i < card.getPhones().length; i++) {
+		if ($phonesInputs.length < card.phones.length) {
+			for (var i = $phonesInputs.length; i < card.phones.length; i++) {
 				$phonesInputs = $("#new_company_form .control-phone__formatted");
 				$phonesInputs[$phonesInputs.length - 1].value = "...";
 				$($("#new_company_form .linked-form__multiple-container .linked-form__field-add-multiple .linked-form__field__value")[0]).click();
 				$phonesInputs[$phonesInputs.length - 1].value = "";
 			}
 		}
-		
+
 		if ($emailsInputs.length < card.emails.length) {
 			for (var i = $emailsInputs.length; i < card.emails.length; i++) {
 				$emailsInputs = $("#new_company_form .text-input[data-type = email]");
@@ -101,182 +266,106 @@
 	}
 
 	function fillPlaceholders($inputs, card) {
-		setPlaceholder($inputs.number, "№ " + card.getNumber());
-		setPlaceholder($inputs.name, card.getName());
-		setPlaceholder($inputs.city, card.getCity());
-		
-		for (var i = 0; i < $inputs.getPhones().length; i++) {
-			setPlaceholder($($inputs.getPhones()[i]), card.getPhones()[i]);
+		setPlaceholder($inputs.number, "№ " + card.number);
+		setPlaceholder($inputs.name, card.name);
+		setPlaceholder($inputs.city, card.city);
+
+		for (var i = 0; i < $inputs.phones.length; i++) {
+			setPlaceholder($($inputs.phones[i]), card.phones[i]);
 		}
-		
+
 		for (var i = 0; i < $inputs.emails.length; i++) {
-			setPlaceholder($($inputs.emails[i]), card.getEmails()[i]);
+			setPlaceholder($($inputs.emails[i]), card.emails[i]);
 		}
-		
-		setPlaceholder($inputs.site, card.getWebsite());
-		setPlaceholder($inputs.adress, card.getAddress);
+
+		setPlaceholder($inputs.website, card.website);
+		setPlaceholder($inputs.adress, card.address);
 	}
 
 	function getCard() {
-		chrome.extension.sendMessage({name: "getCard"}, function(req) {
-			// if (this.card.id == null || (req == null && this.card.id != req.id)) {
-				// return req;
-			// } else if (req != null) {
-				return req;
-			// }
-		});
+		var req;
+
+
+		return {
+			on: function(event, callback) {
+				console.log(req);
+				callback(req);
+			}
+		}
 	}
 
 	function setPlaceholder($element, str) {
 		$element[0].placeholder = str;
 	}
 
-
-	function Card() {
-		// number
-		this.setNumber = function(number) {
-			this.number = number;
-		};
-		
-		this.getNumber = function() {
-			return this.number;
-		}
-		
-		// name
-		this.setName = function(name) {
-			this.name = name;
-		};
-		
-		this.getName = function() {
-			return this.name;
-		};
-		
-		// address
-		this.setAddress = function(address) {
-			console.log(address);
-			this.address = address;
-		}
-		
-		this.getAddress = function() {
-			return this.address;
-		};
-		
-		// city
-		this.setCity = function(city) {
-			this.city = city;
-		};
-		
-		this.getCity = function() {
-			return this.city;
-		};
-		
-		// phones
-		this.setPhones = function(phones) {
-			this.phones = phones;
-		};
-		
-		this.getPhones = function() {
-			return this.phones;
-		}
-		
-		// emails
-		this.setEmails = function(emails) {
-			this.emails = emails;
-		};
-		
-		this.getEmails = function() {
-			return this.emails;
-		};
-		
-		// website
-		this.setWebsite = function(website) {
-			this.website = website;
-		};
-		
-		this.getWebsite = function() {
-			return this.website;
-		};
-	}
-
 	function Parser() {
 		this.getName = function() {
 			return $(".cardHeader__headerNameText").text();
 		};
-		
+
 		this.getAddress = function() {
-			var addressTemp;
-			
-			// if ($(".card__filials")[0] != null) {
-				// var html = $.ajax($(".card__filials .card__filialsLink")[0].href);
-				
-				// html.done(function(d) {
-					// var $articles = $(d).find("article");
-					
-					// addressTemp = $articles.length + ($articles.length % 10 < 5 ? " филиала: " : " филиалов: ");
-					
-					// for (var i = 0; i < $articles.length; i++) {
-						// if ($($articles[i]).find("._address")[0] == null) {
-							// addressTemp += $($articles[i]).find(".miniCard__headerTitleLink")[0]
-								// .text.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
-						// } else {
-							// addressTemp += $($articles[i]).find(".miniCard__address")[0]
-								// .innerHTML.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
-						// }
-						
-					// }
-					
-					//return addressTemp;
-				// });
-				
-				// html.fail(function(e, g, f) {
-					// addressTemp = $(".card__addressLink")[0].text.replace("&nbsp;", " ").replace("<br>", " ");
-					//return addressTemp;
-				// });
-			// } else {
+			/*var addressTemp;
+
+			if ($(".card__filials")[0] != null) {
+				var html = $.ajax($(".card__filials .card__filialsLink")[0].href);
+
+				html.done(function(d) {
+					var $articles = $(d).find("article");
+
+					addressTemp = $articles.length + ($articles.length % 10 < 5 ? " филиала: " : " филиалов: ");
+
+					for (var i = 0; i < $articles.length; i++) {
+						if ($($articles[i]).find("._address")[0] == null) {
+							addressTemp += $($articles[i]).find(".miniCard__headerTitleLink")[0]
+								.text.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
+						} else {
+							addressTemp += $($articles[i]).find(".miniCard__address")[0]
+								.innerHTML.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
+						}
+
+					}
+
+					return addressTemp;
+				});
+
+				html.fail(function(e, g, f) {
+					addressTemp = $(".card__addressLink")[0].text.replace("&nbsp;", " ").replace("<br>", " ");
+					return addressTemp;
+				});
+			} else {*/
 				addressTemp = $(".card__addressLink")[0].text.replace("&nbsp;", " ").replace("<br>", " ");
 				return addressTemp;
 			// }
-			
-			
-			// while(addressTemp != undefined);
-			// return addressTemp;
-			// intervalId = setInterval(function() {
-				// if (addressTemp != undefined) {
-					// clearInterval(intervalId);
-					// console.log(addressTemp);
-					// return addressTemp;
-				// }
-			// }, 100);
 		};
-		
+
 		this.getCity = function() {
 			return $("title")[0].innerHTML
 						.substring(	$("title")[0].innerHTML.lastIndexOf(",") + 2,
 									$("title")[0].innerHTML.lastIndexOf("—") - 1);
 		};
-		
+
 		this.getPhones = function() {
 			var phonesTemp = [];
-			
+
 			for (var i = 1; i < $(".contact__phonesItemLinkNumber").toArray().length; i++) {
 				phonesTemp.push($(".contact__phonesItemLinkNumber").toArray()[i].innerHTML);
 			}
-			
+
 			return phonesTemp;
 		};
-		
+
 		this.getEmails = function() {
 			var emailsTemp = [];
-			
+
 			for (var i = 0; i < $(".contact__otherList .contact__linkText").toArray().length; i++) {
 				if (~$(".contact__otherList .contact__linkText")[i].href.indexOf("mailto")) {
 					emailsTemp.push($(".contact__otherList .contact__linkText").toArray()[i].innerHTML);
 				}
 			}
-			
+
 			return emailsTemp;
 		};
-		
+
 		this.getWebsite = function() {
 			return $($("._type_website .contact__linkText")[0]).text();
 		};
@@ -301,7 +390,7 @@
 
 	  textArea.style.background = 'transparent';
 
-	  
+
 	  textArea.value = text;
 
 	  document.body.appendChild(textArea);
@@ -316,16 +405,16 @@
 
 	  document.body.removeChild(textArea);
 	};
-	
+
 	function copyCard(card) {
-	var parser = new Parser();
-	
-	card.setName(parser.getName());
-	card.setAddress(parser.getAddress());
-	card.setCity(parser.getCity());
-	card.setPhones(parser.getPhones());
-	card.setEmails(parser.getEmails());
-	card.setWebsite(parser.getWebsite());
+		var parser = new Parser();
+
+		card.name = parser.getName();
+		card.address = parser.getAddress();
+		card.city = parser.getCity();
+		card.phones = parser.getPhones();
+		card.emails = parser.getEmails();
+		card.website = parser.getWebsite();
 
 	/*card = {
 		name: $(".cardHeader__headerNameText").text(),
@@ -337,28 +426,28 @@
 		site: $($("._type_website .contact__linkText")[0]).text(),
 		emails: []
 	}
-	
+
 	var phonesTemp = [];
 	var emailsTemp = [];
-	
+
 	for (var i = 1; i < $(".contact__phonesItemLinkNumber").toArray().length; i++) {
 		phonesTemp.push($(".contact__phonesItemLinkNumber").toArray()[i].innerHTML);
 	}
 	card.phones = phonesTemp;
-	
+
 	for (var i = 0; i < $(".contact__otherList .contact__linkText").toArray().length; i++) {
 		emailsTemp.push($(".contact__otherList .contact__linkText").toArray()[i].innerHTML);
 	}
 	card.emails = emailsTemp;
-	
+
 	// if ($(".card__filials")[0] != null) {
 		// var html = $.ajax($(".card__filials .card__filialsLink")[0].href);
-		
+
 		// html.done(function(d) {
 			// var $articles = $(d).find("article");
-			
+
 			// card.adress = $articles.length + ($articles.length % 10 < 5 ? " филиала: " : " филиалов: ");
-			
+
 			// for (var i = 0; i < $articles.length; i++) {
 				// if ($($articles[i]).find("._address")[0] == null) {
 					// card.adress += $($articles[i]).find(".miniCard__headerTitleLink")[0]
@@ -367,13 +456,13 @@
 					// card.adress += $($articles[i]).find(".miniCard__address")[0]
 						// .innerHTML.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
 				// }
-				
+
 			// }
-			
+
 			// console.log(card.adress);
 			// chrome.extension.sendMessage({name: "setCard", value: card});
 		// });
-		
+
 		// html.fail(function(e, g, f) {
 			// console.log("fail to parse");
 		// });
@@ -381,9 +470,9 @@
 		card.adress = $(".card__addressLink")[0].text.replace("&nbsp;", " ").replace("<br>", " ");
 		chrome.extension.sendMessage({name: "setCard", value: card});
 	// }
-	
-	*/
-};
+*/
+
+	};
 })()
 
 
@@ -401,10 +490,3 @@
 	// site: 	$($newCompanyForm.find(".text-input[type = url]")[0]),
 	// adress: $($newCompanyForm.find("textarea")[0])
 // };
-
-
-
-
-
-
-
