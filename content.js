@@ -221,19 +221,3 @@
 	  document.body.removeChild(textArea);
 	};
 })()
-
-
-
-// var $newCompanyForm = $("#new_company_form");
-// var card = {};
-// var cardd = new Card();
-
-// var $inputs = {
-	// number:	$($("#person_name")[0]),
-	// city: 	$($(".card-entity-form__fields textarea")[0]),
-	// name: 	$($newCompanyForm.find("#new_company_name")[0]),
-	// phones: [],
-	// emails: [],
-	// site: 	$($newCompanyForm.find(".text-input[type = url]")[0]),
-	// adress: $($newCompanyForm.find("textarea")[0])
-// };
