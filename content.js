@@ -104,14 +104,7 @@
 		setPlaceholder($inputs.adress, card.address);
 	}
 
-	function getCard() {
-		var req;
 
-
-		return {
-			on: function(event, callback) {
-				console.log(req);
-				callback(req);
 			}
 		}
 	}
