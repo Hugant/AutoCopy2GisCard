@@ -26,14 +26,18 @@
 				adress: $($newCompanyForm.find("textarea")[0])
 			};
 
-			chrome.extension.sendMessage({name: "getCard"}, function(req) {
-				var card = req;
+			$($("#new_contact_form")[0]).removeClass("expanded");
+			$(".js-control--suggest--list").css({top: "-240px"});
+
+			chrome.extension.sendMessage({name: "getCard"}, function(card) {
 
 				$inputs.name.bind("click", function() {
 					addInputs(card);
 
-					$inputs.phones = $newCompanyForm.find(".control-phone__formatted").toArray();
-					$inputs.emails = $newCompanyForm.find(".text-input[data-type = email]").toArray();
+					$inputs.phones = $newCompanyForm
+						.find(".control-phone__formatted").toArray();
+					$inputs.emails = $newCompanyForm
+						.find(".text-input[data-type = email]").toArray();
 
 					fillPlaceholders($inputs, card);
 					copyTextToClipboard(card.name);
@@ -72,7 +76,10 @@
 			for (var i = $phonesInputs.length; i < card.phones.length; i++) {
 				$phonesInputs = $("#new_company_form .control-phone__formatted");
 				$phonesInputs[$phonesInputs.length - 1].value = "...";
-				$($("#new_company_form .linked-form__multiple-container .linked-form__field-add-multiple .linked-form__field__value")[0]).click();
+				$($("#new_company_form " +
+					".linked-form__multiple-container " +
+					".linked-form__field-add-multiple " +
+					".linked-form__field__value")[0]).click();
 				$phonesInputs[$phonesInputs.length - 1].value = "";
 			}
 		}
@@ -81,7 +88,10 @@
 			for (var i = $emailsInputs.length; i < card.emails.length; i++) {
 				$emailsInputs = $("#new_company_form .text-input[data-type = email]");
 				$emailsInputs[$emailsInputs.length - 1].value = "...";
-				$($("#new_company_form .linked-form__multiple-container .linked-form__field-add-multiple .linked-form__field__value")[1]).click();
+				$($("#new_company_form " +
+					".linked-form__multiple-container " +
+					".linked-form__field-add-multiple " +
+					".linked-form__field__value")[1]).click();
 				$emailsInputs[$emailsInputs.length - 1].value = "";
 			}
 		}
@@ -265,9 +275,9 @@
 	  textArea.select();
 
 	  try {
-		document.execCommand('copy');
+	  	document.execCommand('copy');
 	  } catch (err) {
-		console.log('Oops, unable to copy');
+		  console.log('Oops, unable to copy');
 	  }
 
 	  document.body.removeChild(textArea);
