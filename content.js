@@ -4,9 +4,9 @@
 			this.onkeydown = function(e) {
 				if (e.ctrlKey && e.keyCode == 67) {
 					var card = {};
-					copyCard(card);
-					chrome.extension.sendMessage({name: "setCard", value: card});
-					console.log(card);
+					copyCard(card, function() {
+						chrome.extension.sendMessage({name: "setCard", value: card});
+					});
 				}
 			}
 		}
@@ -104,22 +104,62 @@
 		setPlaceholder($inputs.adress, card.address);
 	}
 
+	function copyCard(card, onComplete) {
+		const parser = new Parser();
+		let counter = 0;
 
+		let ready = function() {
+			counter++;
+			if (counter == 6) {
+				onComplete();
 			}
 		}
-	}
+
+		parser.getName(function(name) {
+			card.name = name;
+			ready();
+		});
+
+		parser.getCity(function(city) {
+			card.city = city;
+			ready();
+		});
+
+		parser.getPhones(function(phones) {
+			card.phones = phones;
+			ready();
+		});
+
+		parser.getEmails(function(emails) {
+			card.emails = emails;
+			ready();
+		});
+
+		parser.getWebsite(function(website) {
+			card.website = website;
+			ready();
+		});
+
+		parser.getAddress(function(address) {
+			card.address = address;
+			ready();
+		});
+
+
+	};
 
 	function setPlaceholder($element, str) {
 		$element[0].placeholder = str;
 	}
 
 	function Parser() {
-		this.getName = function() {
-			return $(".cardHeader__headerNameText").text();
+		this.getName = function(onComplete) {
+			let name = $(".cardHeader__headerNameText").text();
+			onComplete(name);
 		};
 
-		this.getAddress = function() {
-			/*var addressTemp;
+		this.getAddress = function(onComplete) {
+			let address;
 
 			if ($(".card__filials")[0] != null) {
 				var html = $.ajax($(".card__filials .card__filialsLink")[0].href);
@@ -127,62 +167,74 @@
 				html.done(function(d) {
 					var $articles = $(d).find("article");
 
-					addressTemp = $articles.length + ($articles.length % 10 < 5 ? " филиала: " : " филиалов: ");
+					address = $articles.length +
+						($articles.length % 10 < 5 ? " филиала: " : " филиалов: ");
 
-					for (var i = 0; i < $articles.length; i++) {
+					for (let i = 0; i < $articles.length; i++) {
 						if ($($articles[i]).find("._address")[0] == null) {
-							addressTemp += $($articles[i]).find(".miniCard__headerTitleLink")[0]
-								.text.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
+							address += $($articles[i])
+								.find(".miniCard__headerTitleLink")[0].text
+								.replace("&nbsp;", " ")
+								.replace("<br>", " ") + "; ";
 						} else {
-							addressTemp += $($articles[i]).find(".miniCard__address")[0]
-								.innerHTML.replace("&nbsp;", " ").replace("<br>", " ") + "; ";
+							address += $($articles[i])
+								.find(".miniCard__address")[0].innerHTML
+								.replace("&nbsp;", " ")
+								.replace("<br>", " ") + "; ";
 						}
 
 					}
 
-					return addressTemp;
+					onComplete(address);
 				});
 
 				html.fail(function(e, g, f) {
-					addressTemp = $(".card__addressLink")[0].text.replace("&nbsp;", " ").replace("<br>", " ");
-					return addressTemp;
+					address = $(".card__addressLink")[0].text
+						.replace("&nbsp;", " ").replace("<br>", " ");
+					onComplete(address);
 				});
-			} else {*/
-				addressTemp = $(".card__addressLink")[0].text.replace("&nbsp;", " ").replace("<br>", " ");
-				return addressTemp;
-			// }
+			} else {
+				address = $(".card__addressLink")[0].text
+					.replace("&nbsp;", " ").replace("<br>", " ");
+				onComplete(address);
+			}
 		};
 
-		this.getCity = function() {
-			return $("title")[0].innerHTML
+		this.getCity = function(onComplete) {
+			let city =
+				$("title")[0].innerHTML
 						.substring(	$("title")[0].innerHTML.lastIndexOf(",") + 2,
 									$("title")[0].innerHTML.lastIndexOf("—") - 1);
+			onComplete(city);
 		};
 
-		this.getPhones = function() {
-			var phonesTemp = [];
+		this.getPhones = function(onComplete) {
+			let phones = [];
 
-			for (var i = 1; i < $(".contact__phonesItemLinkNumber").toArray().length; i++) {
-				phonesTemp.push($(".contact__phonesItemLinkNumber").toArray()[i].innerHTML);
+			for (let i = 1; i < $(".contact__phonesItemLinkNumber").toArray().length; i++) {
+				phones.push($(".contact__phonesItemLinkNumber")
+					.toArray()[i].innerHTML);
 			}
 
-			return phonesTemp;
+			onComplete(phones);
 		};
 
-		this.getEmails = function() {
-			var emailsTemp = [];
+		this.getEmails = function(onComplete) {
+			let emails = [];
 
 			for (var i = 0; i < $(".contact__otherList .contact__linkText").toArray().length; i++) {
 				if (~$(".contact__otherList .contact__linkText")[i].href.indexOf("mailto")) {
-					emailsTemp.push($(".contact__otherList .contact__linkText").toArray()[i].innerHTML);
+					emails.push($(".contact__otherList .contact__linkText")
+						.toArray()[i].innerHTML);
 				}
 			}
 
-			return emailsTemp;
+			onComplete(emails);
 		};
 
-		this.getWebsite = function() {
-			return $($("._type_website .contact__linkText")[0]).text();
+		this.getWebsite = function(onComplete) {
+			let website = $($("._type_website .contact__linkText")[0]).text();
+			onComplete(website);
 		};
 	}
 
